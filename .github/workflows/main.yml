@@ -5,36 +5,32 @@ jobs:
   prepare-and-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 1. Установка инструментов
       - name: Install ImageMagick
         run: sudo apt-get install -y imagemagick
 
-      # 2. Загрузка логотипа
+      # 2. Загрузка логотипа FOX RP
       - name: Download Logo
         run: |
           curl -L "https://raw.githubusercontent.com/TesterTheFoxYT-Of/FOX-RP/main/images.jpeg" -o logo_raw.jpg
 
-      # 3. Настройка серверов, КЭША и отключение Новогоднего режима
+      # 3. Настройка серверов и кэша
       - name: Configure FOX RP Settings
         run: |
           mkdir -p src/constants
-          
-          # Настройка серверов
           echo 'export const SERVERS = [
             { name: "FOX RP | ICE", ip: "188.127.241.74", port: 2329 },
             { name: "FOX RP | BLACK", ip: "188.127.241.74", port: 3274 },
             { name: "FOX RP | WHITE", ip: "188.127.241.74", port: 1453 }
           ];' > src/constants/servers.ts
           
-          # Настройка .env (прописываем кэш и отключаем выбор)
           echo "URL_DISTRIBUTION=https://www.dropbox.com/scl/fi/g4791eve3lfu8t29imu75/cache.zip?rlkey=8y4ani8ol494h7fq40zph7vkz&st=jr1mhztx&dl=1" > .env
           echo "LINK_SITE=https://github.com/TesterTheFoxYT-Of/FOX-RP" >> .env
           echo "DEFAULT_CACHE_TYPE=standard" >> .env
           echo "ENABLE_WINTER_MODE=false" >> .env
 
-          # Хак: Принудительно отключаем выбор в коде (если файлы существуют)
           sed -i 's/showCacheSelect: true/showCacheSelect: false/g' src/config/index.ts 2>/dev/null || true
           sed -i 's/isWinter: true/isWinter: false/g' src/config/index.ts 2>/dev/null || true
 
@@ -57,11 +53,11 @@ jobs:
           cp android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
           cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
 
-      # 5. Сборка
+      # 5. Сборка (Node.js 18+)
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Install Dependencies
         run: npm install
@@ -72,9 +68,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      # 6. Выгрузка APK
+      # 6. Выгрузка APK (Версия V4)
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: FOX-RP-Launcher
           path: android/app/build/outputs/apk/release/*.apk
